@@ -87,7 +87,7 @@ const ceo: Employee = {
 class IEmployeeOrgApp {
 
     private allEmployees: Employee;
-    private history: Employee[] = [];
+    private history: String[] = [];
     private currentIndex: number = -1;
 
     constructor(ceo: Employee) {
@@ -98,33 +98,38 @@ class IEmployeeOrgApp {
         const employee = this.findEmployee(employeeID, this.allEmployees)
         const supervisor = this.findEmployee(supervisorID, this.allEmployees)
         if (employee && supervisor) {
-            this.addToHistory(this.allEmployees)
+            this.addToHistory()
             this.removeFromSupervisor(employee)
             supervisor.subordinates.push(employee)
         } else
             console.log("Unable to find the employee please check again with different ID")
+        console.log("move", this.allEmployees);
     }
 
     undo(): void {
         if (this.currentIndex > 0) {
+            const prevState = this.history[this.currentIndex]
+            this.addToHistory()
+            this.allEmployees = JSON.parse(prevState)
             this.currentIndex--;
-            this.allEmployees = this.history[this.currentIndex];
         }
+        console.log("undo", this.allEmployees);
     }
 
     redo(): void {
         if (this.currentIndex < this.history.length - 1) {
             this.currentIndex++
-            this.allEmployees = this.history[this.currentIndex]
+            const prevState = this.history[this.currentIndex]
+            this.allEmployees = JSON.parse(prevState)
         }
-        console.log(this.allEmployees);
+        console.log("redo", this.allEmployees);
     }
 
-    private addToHistory(employees: Employee): void {
+    private addToHistory(): void {
         if (this.currentIndex < this.history.length - 1) {
             this.history.splice(this.currentIndex + 1)
         }
-        this.history.push(employees)
+        this.history.push(JSON.stringify(this.allEmployees))
         this.currentIndex = this.history.length - 1
     }
 
@@ -169,4 +174,4 @@ const app = new IEmployeeOrgApp(ceo)
 app.move(10, 4)
 app.move(9, 5)
 app.undo()
-// const 
+app.redo()
